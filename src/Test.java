@@ -20,8 +20,8 @@ public class Test {
             boolean success = parser.parse(input);
             
             if (success) {
-                System.out.println("  Command: " + parser.getCommandName());
-                System.out.println("  Args: " + java.util.Arrays.toString(parser.getArgs()));
+                System.out.println("Command: " + parser.getCommandName());
+                System.out.println("Args: " + java.util.Arrays.toString(parser.getArgs()));
             }
             else {
                 System.out.println("Failed to parse");
