@@ -75,13 +75,6 @@ The program follows a structured object-oriented design with two main classes:
 - Error handling and validatio
 - Final integration testing
 
-## Technical Implementation
-
-- **Language**: Java
-- **File Operations**: Uses Java's built-in file I/O APIs
-- **Path Handling**: Supports both relative and absolute paths
-- **Platform**: Cross-platform compatibility
-
 ## Usage
 
 The CLI runs in an interactive loop, accepting commands until the user types "exit". Each command is parsed and executed immediately, with appropriate output or error messages displayed to the user.
