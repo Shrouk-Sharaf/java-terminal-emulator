@@ -82,7 +82,7 @@ The CLI runs in an interactive loop, accepting commands until the user types "ex
 ## Assignment Requirements
 
 This implementation fulfills all specified requirements including:
-- 13+ command implementations
+- 15 command implementations
 - Proper error handling without program termination
 - Support for relative and absolute paths
 - Redirection operators
