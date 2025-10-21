@@ -14,42 +14,42 @@ class Parser {
     String redirectFile;     
     
     public boolean parse(String input) {
-        if (input == null || input.trim().isEmpty()) {
-            return false;
-        }
-        String[] parts = input.trim().split("\\s+");
-        
-        int redirectIndex = -1;
-        for (int i = 0; i < parts.length; i++) {
-            if (parts[i].equals(">") || parts[i].equals(">>")) {
-                redirectOperator = parts[i];
-                if (i + 1 < parts.length) {
-                    redirectFile = parts[i + 1];
-                    redirectIndex = i;
-                }
-                else {
-                    System.out.println("Error: Redirection operator '" + parts[i] + "' requires a filename");
-                    return false;
-                }
-                break;
-            }
-        }
-        
-        if (redirectIndex != -1) {
-            commandName = parts[0];
-            args = Arrays.copyOfRange(parts, 1, redirectIndex);
-        } 
-
-        else if (commandName.isEmpty()) {
-            return false;
-        }
-        else {
-            commandName = parts[0];
-            args = parts.length > 1 ? Arrays.copyOfRange(parts, 1, parts.length) : new String[0];
-        }
-
-        return true;
+    commandName = null;
+    args = new String[0];
+    redirectOperator = null;
+    redirectFile = null;
+    if (input == null || input.trim().isEmpty()) {
+        return false;
     }
+    String[] parts = input.trim().split("\\s+");
+    
+    int redirectIndex = -1;
+    for (int i = 0; i < parts.length; i++) {
+        if (parts[i].equals(">") || parts[i].equals(">>")) {
+            redirectOperator = parts[i];
+            if (i + 1 < parts.length) {
+                redirectFile = parts[i + 1];
+                redirectIndex = i;
+            }
+            else {
+                System.out.println("Error: Redirection operator '" + parts[i] + "' requires a filename");
+                return false;
+            }
+            break;
+        }
+    }
+    
+    if (redirectIndex != -1) {
+        commandName = parts[0];
+        args = Arrays.copyOfRange(parts, 1, redirectIndex);
+    } 
+    else {
+        commandName = parts[0];
+        args = parts.length > 1 ? Arrays.copyOfRange(parts, 1, parts.length) : new String[0];
+    }
+
+    return commandName != null && !commandName.isEmpty();
+}
 
     public String getRedirectOperator() {
         return redirectOperator;
