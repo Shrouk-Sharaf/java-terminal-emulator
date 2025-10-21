@@ -27,6 +27,10 @@ class Parser {
                     redirectFile = parts[i + 1];
                     redirectIndex = i;
                 }
+                else {
+                    System.out.println("Error: Redirection operator '" + parts[i] + "' requires a filename");
+                    return false;
+                }
                 break;
             }
         }
@@ -34,14 +38,19 @@ class Parser {
         if (redirectIndex != -1) {
             commandName = parts[0];
             args = Arrays.copyOfRange(parts, 1, redirectIndex);
-        } else {
+        } 
+
+        else if (commandName.isEmpty()) {
+            return false;
+        }
+        else {
             commandName = parts[0];
             args = parts.length > 1 ? Arrays.copyOfRange(parts, 1, parts.length) : new String[0];
         }
 
         return true;
     }
-    
+
     public String getRedirectOperator() {
         return redirectOperator;
     }
@@ -53,8 +62,6 @@ class Parser {
     public boolean hasRedirection() {
         return redirectOperator != null;
     }
-    
-
     
     public String getCommandName() {
         return commandName;
@@ -68,48 +75,41 @@ class Parser {
 class Terminal {
     public File myDirectory;
 
-    public Terminal() 
-    {
+    public Terminal() {
         myDirectory = new File(System.getProperty("user.dir"));
     }
-    public void pwd() 
-    {
+    
+    public void pwd() {
         System.out.println(myDirectory.getAbsolutePath());
     }
 
     public void cd(String... args) {
-        if (args.length == 0) 
-        {
+        if (args.length == 0) {
             myDirectory = new File(System.getProperty("user.home"));
         } 
-        else 
-        {
+        else {
             String path = args[0];
             File newDir;
-            if (path.equals("..")) 
-            {
+            if (path.equals("..")) {
                 newDir = myDirectory.getParentFile();
             } 
-            else if (path.equals(".")) 
-            {
+            else if (path.equals(".")) {
                 newDir = myDirectory;
             } 
-            else 
-            {
+            else {
                 newDir = new File(myDirectory,path);
             }
-            if (newDir!=null&&newDir.exists()&&newDir.isDirectory()) 
-            {
+            if (newDir!=null&&newDir.exists()&&newDir.isDirectory()) {
                 myDirectory = newDir;
                 System.out.println("Changed directory to: " + myDirectory.getAbsolutePath());
 
             } 
-            else 
-            {
+            else {
                 System.out.println("cd: no such directory: " + path);
             }
         }
     }
+    
     public void ls() {
         File[] files = myDirectory.listFiles();
         if (files.length == 0) 
@@ -124,8 +124,7 @@ class Terminal {
         }
     }
 
-    public void mkdir(String...args) 
-    {
+    public void mkdir(String...args) {
         if (args.length == 0) 
         {
             System.out.println("mkdir: missing operand");
@@ -146,7 +145,6 @@ class Terminal {
         }
     }
 
-
     public  String resolvePath(String arg) {
     File file = new File(arg);
     if (file.isAbsolute()) {
@@ -156,7 +154,8 @@ class Terminal {
         return resolved.getAbsolutePath();
     }
 }
-  public void touch(String arg){
+
+    public void touch(String arg){
       String path = resolvePath(arg);
        System.out.println("Creating file at: " + path);
       File newFile = new File(path);
@@ -176,7 +175,8 @@ class Terminal {
     }
 }
   }
-  public void rmdir(String arg){
+
+    public void rmdir(String arg){
     
     
     if(arg.equals("*")){
@@ -212,7 +212,7 @@ class Terminal {
     }
 }
 
-  public void rm(String arg) {
+    public void rm(String arg) {
     String path = resolvePath(arg);
     File file = new File(path);
 
@@ -234,7 +234,8 @@ class Terminal {
         System.out.println("Error: '" + path + "' is not a file.");
     }
 }
-public void cp(String arg1, String arg2) {
+
+    public void cp(String arg1, String arg2) {
     try {
         String sourcePath = resolvePath(arg1);
         String destinationPath = resolvePath(arg2);
@@ -258,7 +259,8 @@ public void cp(String arg1, String arg2) {
         System.out.println("Error copying file: " + e.getMessage());
     }
 }
-public void cp_r(String arg1, String arg2) {
+
+    public void cp_r(String arg1, String arg2) {
    try{
      String sourcePath = resolvePath(arg1);
      String destinationPath = resolvePath(arg2);
@@ -290,7 +292,8 @@ public void cp_r(String arg1, String arg2) {
    }
 
 }
-public void cat(String... args) {
+
+    public void cat(String... args) {
     for (String filename : args) {
         String path = resolvePath(filename);
         File file = new File(path);
@@ -315,7 +318,8 @@ public void cat(String... args) {
         }
     }
 }
-private void executeWithRedirection(Runnable command, Parser parser) {
+
+    private void executeWithRedirection(Runnable command, Parser parser) {
     if (parser.hasRedirection()) {
         java.io.ByteArrayOutputStream baos = new java.io.ByteArrayOutputStream();
         try (PrintStream collectingStream = new PrintStream(baos, true, "UTF-8")) {
@@ -343,9 +347,7 @@ private void executeWithRedirection(Runnable command, Parser parser) {
     }
 }
 
-    
-    public void execute(Parser parser) 
-    {
+    public void execute(Parser parser) {
         String command = parser.getCommandName();
         String[] args = parser.getArgs();
         System.setProperty("user.dir", myDirectory.getAbsolutePath());
