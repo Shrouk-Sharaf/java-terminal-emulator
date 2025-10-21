@@ -1,29 +1,60 @@
 import java.util.Arrays;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.FileWriter;
+import java.io.PrintStream;
 import java.io.IOException;
 import java.util.Scanner;
 
 class Parser {
     String commandName;
-    String[] args;  
+    String[] args;
+    String redirectOperator; 
+    String redirectFile;     
     
     public boolean parse(String input) {
         if (input == null || input.trim().isEmpty()) {
             return false;
         }
-        
         String[] parts = input.trim().split("\\s+");
-        commandName = parts[0];
         
-        if (parts.length > 1) {
-            args = Arrays.copyOfRange(parts, 1, parts.length);
-        }
-        else {
-            args = new String[0];  
+        int redirectIndex = -1;
+        for (int i = 0; i < parts.length; i++) {
+            if (parts[i].equals(">") || parts[i].equals(">>")) {
+                redirectOperator = parts[i];
+                if (i + 1 < parts.length) {
+                    redirectFile = parts[i + 1];
+                    redirectIndex = i;
+                }
+                break;
+            }
         }
         
+        if (redirectIndex != -1) {
+            commandName = parts[0];
+            args = Arrays.copyOfRange(parts, 1, redirectIndex);
+        } else {
+            commandName = parts[0];
+            args = parts.length > 1 ? Arrays.copyOfRange(parts, 1, parts.length) : new String[0];
+        }
+
         return true;
     }
+    
+    public String getRedirectOperator() {
+        return redirectOperator;
+    }
+    
+    public String getRedirectFile() {
+        return redirectFile;
+    }
+    
+    public boolean hasRedirection() {
+        return redirectOperator != null;
+    }
+    
+
     
     public String getCommandName() {
         return commandName;
@@ -204,8 +235,116 @@ class Terminal {
         System.out.println("Error: '" + path + "' is not a file.");
     }
 }
+public void cp(String arg1, String arg2) {
+    try {
+        String sourcePath = resolvePath(arg1);
+        String destinationPath = resolvePath(arg2);
+        
+        File sourceFile = new File(sourcePath);
+        
+        if (!sourceFile.exists()) {
+            System.out.println("Source file does not exist: " + sourcePath);
+            return;
+        }
+        FileInputStream inputStream = new FileInputStream(sourcePath);
+        FileOutputStream outputStream = new FileOutputStream(destinationPath);
+        
+      for (int x = inputStream.read(); x != -1; x = inputStream.read()) {
+            outputStream.write(x);
+        }
+        inputStream.close();
+        outputStream.close();
+        System.out.println("File copied successfully!");
+    } catch (IOException e) {
+        System.out.println("Error copying file: " + e.getMessage());
+    }
+}
+public void cp_r(String arg1, String arg2) {
+   try{
+     String sourcePath = resolvePath(arg1);
+     String destinationPath = resolvePath(arg2);
+     if(new File(sourcePath).isFile()){
+        cp(arg1,arg2);
+    }
+     else
+     {
+        File fileDest = new File(destinationPath);
+        if (!fileDest.exists()) {
+        fileDest.mkdirs();
+        }
+        if (new File(sourcePath).listFiles() != null) {
+             for (File file : new File(sourcePath).listFiles()) {
+            if (file.isDirectory()) {
+                cp_r(file.getAbsolutePath(), new File(destinationPath, file.getName()).getAbsolutePath());
+            } else {
+                cp(file.getAbsolutePath(), new File(destinationPath, file.getName()).getAbsolutePath());
+            }
+        }
+        }
+        else{
+            System.out.println("Directory is empty.");
+        }
+    }
+   }
+   catch(Exception e){
+       System.out.println("Error copying file: " + e.getMessage());
+   }
 
-  
+}
+public void cat(String... args) {
+    for (String filename : args) {
+        String path = resolvePath(filename);
+        File file = new File(path);
+
+        if (file.exists() && file.isFile()) 
+        {
+            try (Scanner scanner = new Scanner(file, "UTF-8")) 
+            { 
+                while (scanner.hasNextLine()) 
+                {
+                    System.out.println(scanner.nextLine());
+                }
+                System.out.flush(); 
+            } 
+            catch (IOException e)
+             {
+                System.out.println("Error reading file " + filename + ": " + e.getMessage());
+            }
+        } 
+        else {
+            System.out.println("File not found: " + path);
+        }
+    }
+}
+private void executeWithRedirection(Runnable command, Parser parser) {
+    if (parser.hasRedirection()) {
+        java.io.ByteArrayOutputStream baos = new java.io.ByteArrayOutputStream();
+        try (PrintStream collectingStream = new PrintStream(baos, true, "UTF-8")) {
+            PrintStream originalOut = System.out;
+            System.setOut(collectingStream);
+
+            command.run();
+            System.out.flush();
+            System.setOut(originalOut);
+
+            String output = baos.toString("UTF-8");
+            
+            System.out.print(output);
+
+            boolean append = ">>".equals(parser.getRedirectOperator());
+            try (FileWriter writer = new FileWriter(resolvePath(parser.getRedirectFile()), append)) {
+                writer.write(output);
+            }
+
+        } catch (IOException e) {
+            System.out.println("Error in redirection: " + e.getMessage());
+        }
+    } else {
+        command.run();
+    }
+}
+
+
     
     public void execute(Parser parser) 
     {
@@ -217,13 +356,13 @@ class Terminal {
         switch (command) 
         {
             case "pwd":
-                pwd();
+                executeWithRedirection(() -> pwd(), parser);
                 break;
             case "cd":
                 cd(args);
                 break;
             case "ls":
-                ls();
+                executeWithRedirection(() -> ls(), parser);
                 break;
             case "mkdir":
                 mkdir(args);
@@ -237,6 +376,17 @@ class Terminal {
             case "rm":
                  rm(args[0]);
                  break;
+            case "cp":
+            if (args.length > 0 && args[0].equals("-r")) {
+                cp_r(args[1], args[2]);
+            }
+            else{
+                cp(args[0], args[1]);
+            }
+            break;
+            case "cat":
+                executeWithRedirection(() -> cat(args), parser);
+                break;
             default:
                 System.out.println("Unknown command: " + command);
         }
@@ -265,3 +415,4 @@ public class App{
         input.close();
     }
 }    
+
