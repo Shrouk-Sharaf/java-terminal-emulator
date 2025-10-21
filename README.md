@@ -49,6 +49,9 @@ The program follows a structured object-oriented design with two main classes:
 - Handle command tokenization and argument separation
 - Create the main program loop and exit functionality
 - Set up the basic project structure
+- `exit` allow the CLI to terminate.
+- Error handling and validatio
+- Final integration testing
 
 ### Person 2: File System Commands (Part 1)
 - `pwd` - Print working directory
@@ -71,9 +74,6 @@ The program follows a structured object-oriented design with two main classes:
 ### Person 5: Advanced Utilities & Integration
 - `wc` - Word count
 - `zip` and `unzip` - Compression utilities
-- `exit` allow the CLI to terminate.
-- Error handling and validatio
-- Final integration testing
 
 ## Usage
 
