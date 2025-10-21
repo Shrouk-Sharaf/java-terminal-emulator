@@ -64,6 +64,7 @@ class Parser {
         return args;  
     }
 }
+
 class Terminal {
     public File myDirectory;
 
@@ -80,8 +81,6 @@ class Terminal {
         if (args.length == 0) 
         {
             myDirectory = new File(System.getProperty("user.home"));
-            
-
         } 
         else 
         {
@@ -344,14 +343,12 @@ private void executeWithRedirection(Runnable command, Parser parser) {
     }
 }
 
-
     
     public void execute(Parser parser) 
     {
         String command = parser.getCommandName();
         String[] args = parser.getArgs();
         System.setProperty("user.dir", myDirectory.getAbsolutePath());
-
 
         switch (command) 
         {
@@ -368,51 +365,75 @@ private void executeWithRedirection(Runnable command, Parser parser) {
                 mkdir(args);
                 break;
             case "touch":
-                touch(args[0]);
+                if (args.length > 0) {
+                    touch(args[0]);
+                } else {
+                    System.out.println("touch: missing file operand");
+                }
                 break;
             case "rmdir":
-                rmdir(args[0]);
+                if (args.length > 0) {
+                    rmdir(args[0]);
+                } else {
+                    System.out.println("rmdir: missing operand");
+                }
                 break;
             case "rm":
-                 rm(args[0]);
-                 break;
+                if (args.length > 0) {
+                    rm(args[0]);
+                } else {
+                    System.out.println("rm: missing operand");
+                }
+                break;
             case "cp":
-            if (args.length > 0 && args[0].equals("-r")) {
-                cp_r(args[1], args[2]);
-            }
-            else{
-                cp(args[0], args[1]);
-            }
-            break;
+                if (args.length > 0 && args[0].equals("-r")) {
+                    if (args.length >= 3) {
+                        cp_r(args[1], args[2]);
+                    } else {
+                        System.out.println("cp -r: missing source or destination");
+                    }
+                } else {
+                    if (args.length >= 2) {
+                        cp(args[0], args[1]);
+                    } else {
+                        System.out.println("cp: missing source or destination");
+                    }
+                }
+                break;
             case "cat":
                 executeWithRedirection(() -> cat(args), parser);
+                break;
+            case "exit":
+                System.out.println("Exiting...");
+                System.exit(0);
                 break;
             default:
                 System.out.println("Unknown command: " + command);
         }
     }
-
-    
 }
+
 public class App{
     public static void main(String[] args)  {
-        Parser parser =new Parser();
-        Terminal terminal =new Terminal();
-        Scanner input =new Scanner(System.in);
+        Parser parser = new Parser();
+        Terminal terminal = new Terminal();
+        Scanner input = new Scanner(System.in);
+
+        System.out.println("Welcome to our Terminal! Type 'exit' to quit.");
 
         while (true) {
             System.out.print(terminal.myDirectory.getAbsolutePath() + " $ ");
-            String line = input.nextLine();
+            String line = input.nextLine().trim();
 
-            if (line.equals("exit")) 
+            if (line.equals("exit")) {
+                System.out.println("Exiting...");
                 break;
+            }
 
-            if (parser.parse(line)) 
-            {
+            if (!line.isEmpty() && parser.parse(line)) {
                 terminal.execute(parser);
             }
         }
         input.close();
     }
-}    
-
+}
