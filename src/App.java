@@ -83,67 +83,82 @@ class Terminal {
         System.out.println(myDirectory.getAbsolutePath());
     }
 
-    public void cd(String... args) {
-        if (args.length == 0) {
+    public void cd(String... args) 
+    {
+        if (args.length == 0) 
+        {
             myDirectory = new File(System.getProperty("user.home"));
         } 
-        else {
+        else 
+        {
             String path = args[0];
             File newDir;
-            if (path.equals("..")) {
+            if (path.equals("..")) 
+            {
                 newDir = myDirectory.getParentFile();
             } 
-            else if (path.equals(".")) {
+            else if (path.equals(".")) 
+            {
                 newDir = myDirectory;
             } 
-            else {
-                newDir = new File(myDirectory,path);
+            else 
+            {
+                newDir = new File(path);
+                if (!newDir.isAbsolute()) 
+                {
+                    newDir = new File(myDirectory, path);
+                }
             }
-            if (newDir!=null&&newDir.exists()&&newDir.isDirectory()) {
+            if (newDir!=null&&newDir.exists()&&newDir.isDirectory()) 
+            {
                 myDirectory = newDir;
-                System.out.println("Changed directory to: " + myDirectory.getAbsolutePath());
-
             } 
-            else {
+            else 
+            {
                 System.out.println("cd: no such directory: " + path);
             }
         }
     }
-    
-    public void ls() {
+    public void ls() 
+    {
         File[] files = myDirectory.listFiles();
-        if (files.length == 0) 
+        if (files==null || files.length==0) 
         {
             System.out.println("There are no files to list in this directory.");
+            return;
         } 
-        else 
+        Arrays.sort(files,(a, b)->a.getName().compareToIgnoreCase(b.getName()));
+        for (File file : files) 
         {
-            for (File file : files) {
-                System.out.println(file.getName());
-            }
+            System.out.println(file.getName());
         }
+        
     }
 
-    public void mkdir(String...args) {
-        if (args.length == 0) 
+    public void mkdir(String...args) 
+    {
+        if (args.length ==0) 
         {
             System.out.println("mkdir: missing operand");
             return;
         }
-        File newDir = new File(myDirectory,args[0]);
-        if (newDir.exists()) 
-        {
-            System.out.println("mkdir: cannot create directory '" +args[0]+ "' since file already exists");
-        } 
-        else if (newDir.mkdirs()) 
-        {
-            System.out.println("Directory created: "+newDir.getAbsolutePath());
-        } 
-        else 
-        {
-            System.out.println("mkdir: failed to create directory");
+        for (String dirName:args) {
+            File newDir = new File(myDirectory, dirName);
+            if (newDir.exists()) 
+            {
+                System.out.println("mkdir: cannot create directory '" + dirName + "' since it already exists");
+            } 
+            else if (newDir.mkdirs()) 
+            {
+                System.out.println("Directory created: " + newDir.getAbsolutePath());
+            } 
+            else 
+            {
+                System.out.println("mkdir: failed to create directory '" + dirName + "'");
+            }
         }
     }
+
 
     public  String resolvePath(String arg) {
     File file = new File(arg);
