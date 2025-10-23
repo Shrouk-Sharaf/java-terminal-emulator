@@ -21,7 +21,17 @@ class Parser {
     if (input == null || input.trim().isEmpty()) {
         return false;
     }
-    String[] parts = input.trim().split("\\s+");
+    // String[] parts = input.trim().split("\\s+");
+    List<String> partsList = new ArrayList<>();
+    Matcher matcher = Pattern.compile("\"([^\"]*)\"|(\\S+)").matcher(input);
+    while (matcher.find()) 
+    {
+        if (matcher.group(1) != null)
+            partsList.add(matcher.group(1)); 
+        else
+            partsList.add(matcher.group(2)); 
+    }
+    String[] parts = partsList.toArray(new String[0]);
     
     int redirectIndex = -1;
     for (int i = 0; i < parts.length; i++) {
