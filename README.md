@@ -45,13 +45,3 @@ The program follows a structured object-oriented design with two main classes:
 ## Usage
 
 The CLI runs in an interactive loop, accepting commands until the user types "exit". Each command is parsed and executed immediately, with appropriate output or error messages displayed to the user.
-
-## Assignment Requirements
-
-This implementation fulfills all specified requirements including:
-- 15 command implementations
-- Proper error handling without program termination
-- Support for relative and absolute paths
-- Redirection operators
-- Compression utilities
-- Structured class design as specified
